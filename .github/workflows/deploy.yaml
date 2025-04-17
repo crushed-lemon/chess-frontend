@@ -1,0 +1,28 @@
+name: Build & Push to ECR
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure AWS
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set default.region eu-north-1
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 610596007825.dkr.ecr.eu-north-1.amazonaws.com
+
+      - name: Build and Push Docker image
+        run: |
+          docker build -t chess-frontend .
+          docker tag chess-frontend:latest 610596007825.dkr.ecr.eu-north-1.amazonaws.com/crushed-lemon/chess-frontend
+          docker push 610596007825.dkr.ecr.eu-north-1.amazonaws.com/crushed-lemon/chess-frontend
