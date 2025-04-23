@@ -1,4 +1,4 @@
-name: Deploy to S3
+name: Deploy to S3 using OIDC
 
 on:
   push:
@@ -12,8 +12,16 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install Node.js and dependencies
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: |
+          npm install
+          npm run build
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
