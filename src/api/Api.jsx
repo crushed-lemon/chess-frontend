@@ -1,8 +1,8 @@
-const base_url = 'https://www.crushed-lemon.com/apps/chess/api';
+const BASE_URL = 'https://www.crushed-lemon.com/apps/chess/api';
 
 const SubmitUserName = async (userName) => {
     try {
-        const response = await fetch(`${BASE_URL}`/submit-username, {
+        const response = await fetch(`${BASE_URL}/submit-username`, {
             method : "POST",
             headers : {
                 "Content-Type": "application/json",
