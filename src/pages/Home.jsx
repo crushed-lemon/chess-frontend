@@ -7,7 +7,8 @@ const Home = ({submitUserName}) => {
 
     const submitForm = (e) => {
         e.preventDefault();
-        submitUserName(userName);
+        const response = submitUserName(userName);
+        console.log(response);
     }
 
     return (
