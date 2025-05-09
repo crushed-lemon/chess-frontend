@@ -1,0 +1,8 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr); /* 8 columns */
+  grid-template-rows: repeat(8, 1fr);    /* 8 rows */
+  width: 800px;  /* or 100%, etc. */
+  height: 800px;
+  border: 2px solid black;
+}
