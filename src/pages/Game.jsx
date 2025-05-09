@@ -28,7 +28,7 @@ function Game() {
                         (cell, cellIndex) => {
                             const gridrow = (7 - Math.floor(cellIndex / 8)) + 1;
                             const gridcol = (cellIndex % 8) + 1;
-                            const color = ((gridrow + gridcol) % 2 == 1) ? 'light' : 'dark';
+                            const color = ((gridrow + gridcol) % 2 === 1) ? 'light' : 'dark';
                             return (
                                 <Square key={cellIndex} onPieceMoved={onPieceMoved} piece={cell} position={cellIndex} color={color} style={{gridRow: gridrow, gridColumn: gridcol}}/>);
                         }

@@ -5,7 +5,6 @@ import { useState } from "react";
 function Square({onPieceMoved, piece, position, style, color}) {
 
     const [selfClass, setSelfClass] = useState([`${color} square`]);
-    const [selfPosition, setSelfPosition] = useState([position]);
 
     const handleDragOver = (event) => {
         event.preventDefault();
@@ -31,7 +30,7 @@ function Square({onPieceMoved, piece, position, style, color}) {
         const data = JSON.parse(event.dataTransfer.getData('text/plain'));
         const droppedPiece = data.carriedPiece;
         const sourceSquare = data.source;
-        onPieceMoved(sourceSquare, selfPosition, droppedPiece);
+        onPieceMoved(sourceSquare, position, droppedPiece);
     }
 
     return (
@@ -42,7 +41,7 @@ function Square({onPieceMoved, piece, position, style, color}) {
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
     >
-        <Piece piece={piece} position={selfPosition} />
+        <Piece piece={piece} position={position} />
     </div>
     );
 }

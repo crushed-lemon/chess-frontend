@@ -8,13 +8,14 @@ function Piece({piece, position}) {
         e.dataTransfer.setData('text/plain', data);
     }
 
-    if (piece == 'X') {
+    if (piece === 'X') {
         return <></>;
     }
-    if (piece == 'p') {
+    if (piece === 'p') {
         return (
             <img
                  src={`${process.env.PUBLIC_URL}/assets/pawn2.svg`}
+                 alt='p'
                  height="70px"
                  draggable={true}
                  onDragStart={(e) => handleDragStart(e)}
