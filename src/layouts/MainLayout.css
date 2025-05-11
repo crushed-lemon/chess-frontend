@@ -1,0 +1,23 @@
+
+.header {
+  display: flex;
+  justify-content: space-between; /* pushes left and right sides apart */
+  align-items: center; /* vertical centering */
+  padding: 10px 20px;
+  background-color: #fdf6e3; /* optional: lemon-ish theme */
+  border-bottom: 1px solid #ccc;
+}
+
+.left-side,
+.right-side {
+  display: flex;
+  gap: 12px; /* space between inner elements */
+}
+
+.left-side {
+  justify-content: flex-start;
+}
+
+.right-side {
+  justify-content: flex-end;
+}

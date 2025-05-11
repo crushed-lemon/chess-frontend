@@ -3,11 +3,22 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AuthProvider } from "react-oidc-context";
+
+const cognitoAuthConfig = {
+  authority: "https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_m7qBd8uy1",
+  client_id: "127nttui414onihc7vrt9dbf8i",
+  redirect_uri: "https://www.crushed-lemon.com/apps/chess",
+  response_type: "code",
+  scope: "phone openid email",
+};
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+      <AuthProvider {...cognitoAuthConfig}>
+        <App />
+      </AuthProvider>
   </React.StrictMode>
 );
 

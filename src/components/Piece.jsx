@@ -2,6 +2,12 @@
 
 function Piece({piece, position}) {
 
+    const image = {
+        'p' : 'pawn2',
+        'P' : 'pawn1',
+        'r' : 'rook2'
+    }
+
     function handleDragStart(e) {
         //console.log(fromRow + ", " + fromCol);
         const data = JSON.stringify({carriedPiece: piece, source: position});
@@ -11,11 +17,12 @@ function Piece({piece, position}) {
     if (piece === 'X') {
         return <></>;
     }
-    if (piece === 'p') {
+    if (piece === 'p' || piece === 'P' || piece === 'r') {
+        const imgSrc = `${process.env.PUBLIC_URL}/assets/${image[piece]}.svg`;
         return (
             <img
-                 src={`${process.env.PUBLIC_URL}/assets/pawn2.svg`}
-                 alt='p'
+                 src={imgSrc}
+                 alt={piece}
                  height="70px"
                  draggable={true}
                  onDragStart={(e) => handleDragStart(e)}
