@@ -32,7 +32,8 @@ function Game() {
               }
             }
         };
-      }, []);
+      }
+  );
 
     const toNotation = (index) => {
       const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));

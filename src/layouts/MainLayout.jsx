@@ -5,7 +5,6 @@ import { useAuth } from "react-oidc-context";
 
 const MainLayout = () => {
   const auth = useAuth();
-  const btn = "";
 
   function getButton() {
       if (auth.isLoading) {

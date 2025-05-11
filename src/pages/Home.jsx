@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
 
-    const { socketRef, connect } = useWebSocket();
+    const { connect } = useWebSocket();
     const navigate = useNavigate();
     const [userName, setUserName] = useState('');
 
@@ -32,7 +32,7 @@ const Home = () => {
 
         socket.onmessage = (event) => {
           const data = JSON.parse(event.data);
-          if (data.action && data.action == "gameStarted") {
+          if (data.action && data.action === "gameStarted") {
             const gameId = data.gameId;
             const color = data.color;
             navigate(`/game/${gameId}&userName=${userName}&color=${color}`);
