@@ -5,10 +5,14 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from "react-oidc-context";
 
+const cognitoEndpoint = process.env.REACT_APP_COGNITO_ENDPOINT;
+const clientId = process.env.REACT_APP_COGNITO_CLIENT_ID;
+const redirectUri = process.env.REACT_APP_COGNITO_REDIRECT_URI;
+
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.eu-north-1.amazonaws.com/eu-north-1_m7qBd8uy1",
-  client_id: "127nttui414onihc7vrt9dbf8i",
-  redirect_uri: "https://www.crushed-lemon.com/apps/chess",
+  authority: cognitoEndpoint,
+  client_id: clientId,
+  redirect_uri: redirectUri,
   response_type: "code",
   scope: "phone openid email",
 };

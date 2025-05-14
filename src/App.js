@@ -5,6 +5,7 @@ import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
 import Game from './pages/Game';
 import NoPage from './pages/NoPage';
+import LoginCallback from './pages/LoginCallback';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { WebSocketProvider } from "./provider/WebSocketContext";
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
             <Route path="/game/:gameId" element={<Game />} />
+            <Route path="/login-callback" element={<LoginCallback />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

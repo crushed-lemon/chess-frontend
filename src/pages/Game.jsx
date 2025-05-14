@@ -33,7 +33,7 @@ function Game() {
             }
         };
       }
-  );
+    );
 
     const toNotation = (index) => {
       const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
@@ -55,10 +55,8 @@ function Game() {
         const socket = socketRef.current;
         if (!socket) {
             console.log("Connection is gonezies");
+            return;
         }
-        console.log("sending source = " + toNotation(source));
-        console.log("sending dest = " + toNotation(destination));
-        console.log("sending color = " + color);
         socket.send(JSON.stringify(
         {
             "userName": userName,
