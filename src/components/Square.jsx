@@ -2,9 +2,9 @@ import './Square.css';
 import Piece from './Piece';
 import { useState } from "react";
 
-function Square({onPieceMoved, piece, position, style, color}) {
+function Square({onPieceMoved, piece, position, style, squareTint}) {
 
-    const [selfClass, setSelfClass] = useState([`${color} square`]);
+    const [selfClass, setSelfClass] = useState([`${squareTint} square`]);
 
     const handleDragOver = (event) => {
         event.preventDefault();

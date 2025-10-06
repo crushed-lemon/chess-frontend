@@ -1,7 +1,7 @@
 
 import React from "react";
 import './App.css';
-import MainLayout from './layouts/MainLayout';
+import MainLayout from './layouts/MainLayout2';
 import Home from './pages/Home';
 import Game from './pages/Game';
 import NoPage from './pages/NoPage';

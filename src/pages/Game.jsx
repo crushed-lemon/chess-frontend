@@ -1,19 +1,38 @@
 import { useParams } from 'react-router-dom';
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Square from "../components/Square";
 import './Game.css';
 import { useWebSocket } from "../provider/WebSocketContext";
 import { useEffect } from 'react';
 import axios from 'axios';
+import Terminal from '../components/Terminal';
 
 const domain = process.env.REACT_APP_BACKEND_DOMAIN;
 
 function Game() {
   const { gameId } = useParams();
+  const [ username, setUsername ] = useState(null);
   const [ board, setBoard ] = useState('RNBQKBNRPPPPPPPPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXpppppppprnbqkbnr');
-  const { onMessage, onConnectionStateChange, send, disconnect } = useWebSocket();
+  const [ color, setColor ] = useState('WHITE');
+  const { connectionStatus, onMessage, onConnectionStateChange, send, connect, disconnect } = useWebSocket();
+  const [ connectionState, setConnectionState ] = useState("UNKNOWN");
+  const navigate = useNavigate();
 
-  const handleMessage = (event) => {
+  const [terminalLines, setTerminalLines] = useState([]);
+
+  const movePieceOnBoard = useCallback((source, destination, piece) => {
+    let boardArray = [...board];
+
+    boardArray[source] = 'X';
+    boardArray[destination] = piece;
+
+    const newBoard = boardArray.join('');
+
+    setBoard(newBoard);
+  }, [board]);
+
+  const handleMessage = useCallback((event) => {
       const data = JSON.parse(event.data);
       if (data.action && data.action === "opponentPlayedMove") {
         const source = data.source;
@@ -32,36 +51,54 @@ function Game() {
       }
       if (data.action && data.action === "resigned") {
         const resigningPlayer = data.resigningPlayer;
-        const userName = gameId.split('&userName=')[1].split('&color=')[0];
-        if(userName === resigningPlayer) {
+        if(username === resigningPlayer) {
           document.getElementById("result").innerHTML = "You resigned. Better luck next time.";
         } else {
           document.getElementById("result").innerHTML = "Opponent resigned. Congratulations on victory.";
         }
       }
       
-  };
+  }, [username, movePieceOnBoard]);
 
     useEffect(() => {
+        const un = localStorage.getItem("chess.username");
+        if(!un) {
+          navigate("/");
+          return;
+        }
+        setUsername(un);
         const unsubscribeMessages = onMessage(handleMessage);
         const unsubscribeStateChanges = onConnectionStateChange((state) => {
-          document.getElementById("connState").innerHTML = state;
+          setConnectionState(state);
+          //document.getElementById("connState").innerHTML = state;
         });
 
-        const userName = gameId.split('&userName=')[1].split('&color=')[0];
-        const realGameId = gameId.split('&userName=')[0];
-
-        axios.get(domain + "/ongoing-game?username="+userName+"&gameId="+realGameId)
+        axios.get(domain + "/ongoing-game?username="+un+"&gameId="+gameId)
         .then((response) => {
             setBoard(response.data.board);
+            setColor(response.data.color);
           });
+
+        if(connectionStatus.current === "DISCONNECTED") {
+          connect("wss://wec2i3hiw3.execute-api.eu-north-1.amazonaws.com/production/?userName=" + un)
+        }
 
         return () => {
           unsubscribeMessages();
           unsubscribeStateChanges();
         }
-      }
+      }, [onMessage, onConnectionStateChange, gameId, handleMessage, navigate, connect, connectionStatus]
     );
+
+    useEffect(() => {
+      setTerminalLines([
+        "Connection : " + connectionState,
+        "Ping : 3000 ms",
+        "",
+        "Game Id : " + gameId,
+        "Color : " + color
+      ]);
+    }, [connectionState, gameId, color]);
 
     const toNotation = (index) => {
       const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
@@ -70,38 +107,23 @@ function Game() {
     }
 
     function toIndex(notation) {
-      const file = notation.charCodeAt(0) - 'a'.charCodeAt(0);  // 0–7
-      const rank = parseInt(notation[1], 10) - 1;               // 0–7
+      const file = notation.charCodeAt(0) - 'a'.charCodeAt(0);
+      const rank = parseInt(notation[1], 10) - 1;
       return rank * 8 + file;
     }
 
   const onPieceMoved = (source, destination, piece) => {
-      const realGameId = gameId.split('&userName=')[0];
-      const userNameAndColor = gameId.split('&userName=')[1];
-      const userName = userNameAndColor.split('&color=')[0];
-      const color = userNameAndColor.split('&color=')[1].split('')[0];
       send(JSON.stringify({
-          "userName": userName,
+          "userName": username,
           "action": "movePiece",
-          "gameId": realGameId,
+          "gameId": gameId,
           "move": {
               "movedPiece": piece,
-              "playerColor": color,
+              "playerColor": color[0],
               "startingSquare": toNotation(source),
               "endingSquare": toNotation(destination)
           }
       }));
-  }
-
-  const movePieceOnBoard = (source, destination, piece) => {
-    let boardArray = [...board];
-
-    boardArray[source] = 'X';
-    boardArray[destination] = piece;
-
-    const newBoard = boardArray.join('');
-
-    setBoard(newBoard);
   }
 
   const testDisconnect = () => {
@@ -116,28 +138,57 @@ function Game() {
   }
 
   return (
-        <>
-            <h3>Game ID: {gameId}</h3>
+        <div className="flex flex-col md:flex-row bg-gray-900 text-amber-200 font-light">
+          {/* Left Panel (40%) */}
+          <div className="md:w-2/5 w-full p-6 border-r border-gray-800 flex flex-col space-y-6">
+            
+            {/* Terminal Box for Connection Info + Game ID */}
+            <Terminal ps1='~/chess/game$' lines={terminalLines} />
 
-            <button onClick={testDisconnect}> Test disconnection </button>
-            <button onClick={resign}> Resign </button>
-            <div id="connState"></div>
-            <div id="result" className='text-lg'></div>
-
-            <div className = "board" id = "board">
-                {
-                    [...board].map(
-                        (cell, cellIndex) => {
-                            const gridrow = (7 - Math.floor(cellIndex / 8)) + 1;
-                            const gridcol = (cellIndex % 8) + 1;
-                            const color = ((gridrow + gridcol) % 2 === 1) ? 'light' : 'dark';
-                            return (
-                                <Square key={cellIndex} onPieceMoved={onPieceMoved} piece={cell} position={cellIndex} color={color} style={{gridRow: gridrow, gridColumn: gridcol}}/>);
-                        }
-                    )
-                }
+            {/* Action Buttons */}
+            <div className="flex flex-col space-y-3 w-3/5">
+              <button
+                onClick={testDisconnect}
+                className="bg-gray-800 border border-gray-700 hover:border-amber-400 transition-all duration-200 rounded-lg py-2 text-amber-300 hover:text-amber-100 font-medium"
+              >
+                Offer Draw
+              </button>
+              <button
+                onClick={resign}
+                className="bg-gray-800 border border-gray-700 hover:border-red-400 transition-all duration-200 rounded-lg py-2 text-red-400 hover:text-red-300 font-medium"
+              >
+                Resign
+              </button>
             </div>
-        </>
+          </div>
+
+          {/* Right Panel (60%) */}
+          <div className="md:w-3/5 w-full flex items-center justify-center p-6">
+            <div
+              id="board"
+              className="grid grid-cols-8 grid-rows-8 w-[90%] max-w-[600px] aspect-square border-4 border-gray-800 rounded-xl shadow-inner"
+            >
+              {[...board].map((cell, cellIndex) => {
+                const gridrow = 8 - Math.floor(cellIndex / 8);
+                const gridcol = (cellIndex % 8) + 1;
+                const squareTint = (gridrow + gridcol) % 2 === 1 ? "light" : "dark";
+                return (
+                  <Square
+                    key={cellIndex}
+                    onPieceMoved={onPieceMoved}
+                    piece={cell}
+                    position={cellIndex}
+                    squareTint={squareTint}
+                    style={{
+                      gridRow: gridrow,
+                      gridColumn: gridcol,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
   );
 }
