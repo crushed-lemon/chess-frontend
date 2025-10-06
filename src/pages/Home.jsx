@@ -73,7 +73,7 @@ const Home = () => {
 
         setSavedUsername(sUn);
 
-        axios.get(domain + "/ongoing-lobby")
+        axios.get(domain + "/ongoing-lobby?username="+sUn)
             .then((response) => {
                 if(response.data === null || response.data.lobby === false) {
                     return;
@@ -81,7 +81,7 @@ const Home = () => {
                 setOngoingLobbyRequest(true);
             });
 
-        axios.get(domain + "/ongoing-game-id")
+        axios.get(domain + "/ongoing-game-id?username="+sUn)
             .then((response) => {
                 if(response.data === null) {
                     return;

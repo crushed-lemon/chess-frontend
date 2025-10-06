@@ -48,7 +48,10 @@ function Game() {
           document.getElementById("connState").innerHTML = state;
         });
 
-        axios.get(domain + "/ongoing-game")
+        const userName = gameId.split('&userName=')[1].split('&color=')[0];
+        const realGameId = gameId.split('&userName=')[0];
+
+        axios.get(domain + "/ongoing-game?username="+sUn+"&gameId="+realGameId)
         .then((response) => {
             setBoard(response.data.board);
           });
