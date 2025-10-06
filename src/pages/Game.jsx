@@ -4,34 +4,59 @@ import Square from "../components/Square";
 import './Game.css';
 import { useWebSocket } from "../provider/WebSocketContext";
 import { useEffect } from 'react';
+import axios from 'axios';
+
+const domain = process.env.REACT_APP_BACKEND_DOMAIN;
 
 function Game() {
   const { gameId } = useParams();
   const [ board, setBoard ] = useState('RNBQKBNRPPPPPPPPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXpppppppprnbqkbnr');
-  const { socketRef } = useWebSocket();
+  const { onMessage, onConnectionStateChange, send, disconnect } = useWebSocket();
+
+  const handleMessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.action && data.action === "opponentPlayedMove") {
+        const source = data.source;
+        const destination = data.destination;
+        const piece = data.piece;
+        movePieceOnBoard(source, destination, piece);
+      }
+      if (data.action && data.action === "selfPlayedMove") {
+        const source = toIndex(data.source);
+        const destination = toIndex(data.destination);
+        const piece = data.piece;
+        const error = data.error;
+        if (!error || error === '') {
+          movePieceOnBoard(source, destination, piece);
+        }
+      }
+      if (data.action && data.action === "resigned") {
+        const resigningPlayer = data.resigningPlayer;
+        const userName = gameId.split('&userName=')[1].split('&color=')[0];
+        if(userName === resigningPlayer) {
+          document.getElementById("result").innerHTML = "You resigned. Better luck next time.";
+        } else {
+          document.getElementById("result").innerHTML = "Opponent resigned. Congratulations on victory.";
+        }
+      }
+      
+  };
 
     useEffect(() => {
-        const socket = socketRef.current;
-        if (!socket) return;
+        const unsubscribeMessages = onMessage(handleMessage);
+        const unsubscribeStateChanges = onConnectionStateChange((state) => {
+          document.getElementById("connState").innerHTML = state;
+        });
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.action && data.action === "opponentPlayedMove") {
-              const source = data.source;
-              const destination = data.destination;
-              const piece = data.piece;
-              movePieceOnBoard(source, destination, piece);
-            }
-            if (data.action && data.action === "selfPlayedMove") {
-              const source = toIndex(data.source);
-              const destination = toIndex(data.destination);
-              const piece = data.piece;
-              const error = data.error;
-              if (!error || error === '') {
-                movePieceOnBoard(source, destination, piece);
-              }
-            }
-        };
+        axios.get(domain + "/ongoing-game")
+        .then((response) => {
+            setBoard(response.data.board);
+          });
+
+        return () => {
+          unsubscribeMessages();
+          unsubscribeStateChanges();
+        }
       }
     );
 
@@ -52,23 +77,17 @@ function Game() {
       const userNameAndColor = gameId.split('&userName=')[1];
       const userName = userNameAndColor.split('&color=')[0];
       const color = userNameAndColor.split('&color=')[1].split('')[0];
-        const socket = socketRef.current;
-        if (!socket) {
-            console.log("Connection is gonezies");
-            return;
-        }
-        socket.send(JSON.stringify(
-        {
-            "userName": userName,
-            "action": "movePiece",
-            "gameId": realGameId,
-            "move": {
-                "movedPiece": piece,
-                "playerColor": color,
-                "startingSquare": toNotation(source),
-                "endingSquare": toNotation(destination)
-            }
-        }));
+      send(JSON.stringify({
+          "userName": userName,
+          "action": "movePiece",
+          "gameId": realGameId,
+          "move": {
+              "movedPiece": piece,
+              "playerColor": color,
+              "startingSquare": toNotation(source),
+              "endingSquare": toNotation(destination)
+          }
+      }));
   }
 
   const movePieceOnBoard = (source, destination, piece) => {
@@ -82,9 +101,25 @@ function Game() {
     setBoard(newBoard);
   }
 
+  const testDisconnect = () => {
+    disconnect();
+  }
+
+  const resign = () => {
+    axios.post(domain + "/resign")
+    .then((response) => {
+      console.log(response);
+    });
+  }
+
   return (
         <>
             <h3>Game ID: {gameId}</h3>
+
+            <button onClick={testDisconnect}> Test disconnection </button>
+            <button onClick={resign}> Resign </button>
+            <div id="connState"></div>
+            <div id="result" className='text-lg'></div>
 
             <div className = "board" id = "board">
                 {

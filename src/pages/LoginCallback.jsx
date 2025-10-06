@@ -23,9 +23,11 @@ async function submitCode (code) {
         if (!response.ok) {
             throw new Error(`Server error: ${response.status}`);
         }
-        await response.text();
+        const text = await response.text();
+        console.log(text);
+        document.getElementById("llgg").innerHTML = text;
         // No need to process the response, it only sets the cookie
-        window.location.href = successful_login_redirect_uri;
+        // window.location.href = successful_login_redirect_uri;
     } catch (ex) {
     }
 }
@@ -40,7 +42,7 @@ const LoginCallback = () => {
     }
 
     return (
-        <div>Redirecting...</div>
+        <div id="llgg">Redirecting...</div>
     );
 
 }

@@ -11,18 +11,18 @@ import { WebSocketProvider } from "./provider/WebSocketContext";
 
 function App() {
   return (
-    <WebSocketProvider>
-      <BrowserRouter basename = "/apps/chess">
-        <Routes>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Home />} />
-            <Route path="/game/:gameId" element={<Game />} />
-            <Route path="/login-callback" element={<LoginCallback />} />
-            <Route path="*" element={<NoPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </WebSocketProvider>
+        <WebSocketProvider>
+          <BrowserRouter basename = "/apps/chess">
+            <Routes>
+              <Route path="/" element={<MainLayout />}>
+                <Route index element={<Home />} />
+                <Route path="/game/:gameId" element={<Game />} />
+                <Route path="*" element={<NoPage />} />
+              </Route>
+              <Route path="/login-callback" element={<LoginCallback />} />
+            </Routes>
+          </BrowserRouter>
+        </WebSocketProvider>
   );
 }
 
