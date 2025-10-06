@@ -9,7 +9,7 @@ function useQuery() {
 }
 
 const domain = process.env.REACT_APP_BACKEND_DOMAIN;
-const successful_login_redirect_uri = process.env.REACT_APP_SUCCESSFUL_LOGIN_REDIRECT_URI;
+// const successful_login_redirect_uri = process.env.REACT_APP_SUCCESSFUL_LOGIN_REDIRECT_URI;
 
 async function submitCode (code) {
     try {
