@@ -52,6 +52,7 @@ function Game() {
       if (data.action && data.action === "resigned") {
         const resigningPlayer = data.resigningPlayer;
         if(username === resigningPlayer) {
+          // TODO : Don't update HTML directly, save this in a state variable and let react render appropriately
           document.getElementById("result").innerHTML = "You resigned. Better luck next time.";
         } else {
           document.getElementById("result").innerHTML = "Opponent resigned. Congratulations on victory.";
@@ -70,7 +71,6 @@ function Game() {
         const unsubscribeMessages = onMessage(handleMessage);
         const unsubscribeStateChanges = onConnectionStateChange((state) => {
           setConnectionState(state);
-          //document.getElementById("connState").innerHTML = state;
         });
 
         axios.get(domain + "/ongoing-game?username="+un+"&gameId="+gameId)
@@ -159,6 +159,8 @@ function Game() {
               >
                 Resign
               </button>
+
+              <div id="result"></div>
             </div>
           </div>
 

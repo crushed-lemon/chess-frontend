@@ -21,12 +21,9 @@ const Home = () => {
     const [terminalLines, setTerminalLines] = useState([]);
 
     const handleDisconnect = useCallback(() => {
-        document.getElementById("connectionInfo").innerHTML = "Disconnected, attempting again";
     }, []);
 
     const handleConnect = useCallback(() => {
-        document.getElementById("connectionInfo").innerHTML = "Connected";
-
         if(ongoingLobbyRequest === true) {
             return;
         }
