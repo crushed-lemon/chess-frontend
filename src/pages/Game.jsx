@@ -14,7 +14,7 @@ function Game() {
   const { gameId } = useParams();
   const [ username, setUsername ] = useState(null);
   const [ board, setBoard ] = useState('RNBQKBNRPPPPPPPPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXpppppppprnbqkbnr');
-  const [ color, setColor ] = useState('WHITE');
+  const [ gameInfo, setGameInfo ] = useState(null);
   const { connectionStatus, onMessage, onConnectionStateChange, send, connect, disconnect } = useWebSocket();
   const [ connectionState, setConnectionState ] = useState("UNKNOWN");
   const navigate = useNavigate();
@@ -76,7 +76,10 @@ function Game() {
         axios.get(domain + "/ongoing-game?username="+un+"&gameId="+gameId)
         .then((response) => {
             setBoard(response.data.board);
-            setColor(response.data.color);
+            setGameInfo({
+              selfColor : response.data.color,
+              currentPlayer : response.data.currentPlayer 
+            });
           });
 
         if(connectionStatus.current === "DISCONNECTED") {
@@ -91,14 +94,20 @@ function Game() {
     );
 
     useEffect(() => {
-      setTerminalLines([
-        "Connection : " + connectionState,
+
+      let lines = ["Connection : " + connectionState,
         "Ping : 3000 ms",
         "",
         "Game Id : " + gameId,
-        "Color : " + color
-      ]);
-    }, [connectionState, gameId, color]);
+      ]
+      if (gameInfo != null && gameInfo.selfColor != null) {
+        lines.push("Color : " + gameInfo.selfColor);
+      }
+      if (gameInfo != null && gameInfo.currentPlayer != null) {
+        lines.push("CurrentPlayer : " + gameInfo.currentPlayer);
+      }
+      setTerminalLines(lines);
+    }, [connectionState, gameId, gameInfo]);
 
     const toNotation = (index) => {
       const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
@@ -119,7 +128,7 @@ function Game() {
           "gameId": gameId,
           "move": {
               "movedPiece": piece,
-              "playerColor": color[0],
+              "playerColor": gameInfo.color[0],
               "startingSquare": toNotation(source),
               "endingSquare": toNotation(destination)
           }
@@ -168,7 +177,7 @@ function Game() {
           <div className="md:w-3/5 w-full flex items-center justify-center p-6">
             <div
               id="board"
-              className="grid grid-cols-8 grid-rows-8 w-[90%] max-w-[600px] aspect-square border-4 border-gray-800 rounded-xl shadow-inner"
+              className="grid grid-cols-8 grid-rows-8 w-[90%] max-w-[600px] min-w-[450px] aspect-square border-4 border-gray-800 rounded-xl shadow-inner"
             >
               {[...board].map((cell, cellIndex) => {
                 const gridrow = 8 - Math.floor(cellIndex / 8);

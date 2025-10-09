@@ -7,15 +7,16 @@
   font-size: 24px;
 }
 
+
 .light {
-    background-color: #dddddd;
+    background-color: #FAEAAE; /* warm pale lemon */
 }
 
 .dark {
-    background-color: #556655;
+    background-color: #6B3E2E; /* medium rustic brown — lighter, richer, keeps contrast */
 }
 
 .hovering-piece {
-    background-color: #99aa99;
-    box-shadow:0px 0px 0px 3px #334433 inset;
+    background-color: #FFD645; /* bright lemon highlight */
+    box-shadow: 0 0 0 3px #D97824 inset; /* softer, slightly lighter rustic orange border */
 }
