@@ -34,22 +34,26 @@ function Game() {
 
   const handleMessage = useCallback((event) => {
       const data = JSON.parse(event.data);
-      if (data.action && data.action === "opponentPlayedMove") {
-        const source = data.source;
-        const destination = data.destination;
-        const piece = data.piece;
-        movePieceOnBoard(source, destination, piece);
-      }
-      if (data.action && data.action === "selfPlayedMove") {
+      console.log(data);
+      if (data.action && data.action === "MOVE_SUCCESS") {
         const source = toIndex(data.source);
         const destination = toIndex(data.destination);
         const piece = data.piece;
-        const error = data.error;
-        if (!error || error === '') {
-          movePieceOnBoard(source, destination, piece);
-        }
+        const nextPlayer = data.nextPlayer;
+        movePieceOnBoard(source, destination, piece);
+        setGameInfo((p) => {
+          return {
+            ...p,
+            currentPlayer : nextPlayer
+          }
+        });
       }
-      if (data.action && data.action === "resigned") {
+      if (data.action && data.action === "ERROR") {
+        // TODO : Give better alert
+        alert("that wasnt allowed, error is " + data.errors);
+        console.error(data.errors);
+      }
+      if (data.action && data.action === "PLAYER_RESIGNED") {
         const resigningPlayer = data.resigningPlayer;
         if(username === resigningPlayer) {
           // TODO : Don't update HTML directly, save this in a state variable and let react render appropriately
@@ -99,6 +103,7 @@ function Game() {
         "Ping : 3000 ms",
         "",
         "Game Id : " + gameId,
+        "PlayerId : " + username
       ]
       if (gameInfo != null && gameInfo.selfColor != null) {
         lines.push("Color : " + gameInfo.selfColor);
@@ -107,7 +112,7 @@ function Game() {
         lines.push("CurrentPlayer : " + gameInfo.currentPlayer);
       }
       setTerminalLines(lines);
-    }, [connectionState, gameId, gameInfo]);
+    }, [connectionState, gameId, gameInfo, username]);
 
     const toNotation = (index) => {
       const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
@@ -128,7 +133,7 @@ function Game() {
           "gameId": gameId,
           "move": {
               "movedPiece": piece,
-              "playerColor": gameInfo.color[0],
+              "playerColor": gameInfo.selfColor[0],
               "startingSquare": toNotation(source),
               "endingSquare": toNotation(destination)
           }
