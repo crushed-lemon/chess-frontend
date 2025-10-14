@@ -5,6 +5,7 @@ import Square from "../components/Square";
 import './Game.css';
 import { useWebSocket } from "../provider/WebSocketContext";
 import { useEffect } from 'react';
+import { getDestinationSquares } from '../rules/ClassicalRules';
 import axios from 'axios';
 import Terminal from '../components/Terminal';
 
@@ -13,10 +14,13 @@ const domain = process.env.REACT_APP_BACKEND_DOMAIN;
 function Game() {
   const { gameId } = useParams();
   const [ username, setUsername ] = useState(null);
-  const [ board, setBoard ] = useState('RNBQKBNRPPPPPPPPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXpppppppprnbqkbnr');
+  const [ board, setBoard ] = useState('');//('RNBQKBNRPPPPPPPPXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXpppppppprnbqkbnr');
   const [ gameInfo, setGameInfo ] = useState(null);
   const { connectionStatus, onMessage, onConnectionStateChange, send, connect, disconnect } = useWebSocket();
   const [ connectionState, setConnectionState ] = useState("UNKNOWN");
+  const [ highlightedPiece, setHighlightedPiece ] = useState(null);
+  const [ highlightedPoisition, setHighlightedPosition ] = useState(null);
+  const [ destinationSquares, setDestinationSquares ] = useState([]);
   const navigate = useNavigate();
 
   const [terminalLines, setTerminalLines] = useState([]);
@@ -140,6 +144,28 @@ function Game() {
       }));
   }
 
+  const onPieceHighlighted = (position, piece) => {
+    console.log("piece was highlighted");
+    setHighlightedPiece(piece);
+    setHighlightedPosition(position);
+    console.log(getDestinationSquares(board, position, piece));
+    setDestinationSquares(getDestinationSquares(board, position, piece));
+  }
+
+  const onPiecePlaced = (position) => {
+    if(position === highlightedPoisition) {
+      console.log("Placed to same square, not doing anything");
+    }
+    onPieceMoved(highlightedPoisition, position, highlightedPiece);
+    onPieceHighlightCleared();
+  }
+
+  const onPieceHighlightCleared = () => {
+    setHighlightedPiece(null);
+    setHighlightedPosition(null);
+    setDestinationSquares([]);
+  }
+
   const testDisconnect = () => {
     disconnect();
   }
@@ -188,13 +214,19 @@ function Game() {
                 const gridrow = 8 - Math.floor(cellIndex / 8);
                 const gridcol = (cellIndex % 8) + 1;
                 const squareTint = (gridrow + gridcol) % 2 === 1 ? "light" : "dark";
+                const isDestination = destinationSquares.includes(cellIndex);
+
                 return (
                   <Square
                     key={cellIndex}
                     onPieceMoved={onPieceMoved}
+                    onPieceHighlighted={onPieceHighlighted}
+                    onPiecePlaced={onPiecePlaced}
+                    onPieceHighlightCleared={onPieceHighlightCleared}
                     piece={cell}
                     position={cellIndex}
                     squareTint={squareTint}
+                    isDestination={isDestination}
                     style={{
                       gridRow: gridrow,
                       gridColumn: gridcol,

@@ -3,9 +3,10 @@
 const background = 't'; // transparent background
 const size = 45; // size is 45x45
 
-function Piece({piece, position}) {
+function Piece({piece, position, onPieceHighlightCleared}) {
 
     function handleDragStart(e) {
+        onPieceHighlightCleared();
         const data = JSON.stringify({carriedPiece: piece, source: position});
         e.dataTransfer.setData('text/plain', data);
     }

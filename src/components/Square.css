@@ -7,7 +7,6 @@
   font-size: 24px;
 }
 
-
 .light {
     background-color: #FAEAAE; /* warm pale lemon */
 }
@@ -17,6 +16,35 @@
 }
 
 .hovering-piece {
-    background-color: #FFD645; /* bright lemon highlight */
-    box-shadow: 0 0 0 3px #D97824 inset; /* softer, slightly lighter rustic orange border */
+  position: relative;
+  box-shadow: 0 0 0 3px #D97824 inset, 0 0 12px rgba(255, 214, 69, 0.6);
+  transform: scale(1.02);
+  z-index: 2;
+}
+
+.destination {
+    position: relative;
+    /* keep underlying color visible */
+    box-shadow: 0 0 0 3px #E8802A inset, 0 0 10px rgba(255, 214, 69, 0.6);
+    /* subtle highlight ring */
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.destination::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    background: radial-gradient(
+        circle at center,
+        rgba(255, 214, 69, 0.25) 0%,   /* soft lemon glow center */
+        rgba(255, 214, 69, 0.05) 60%,
+        transparent 100%
+    );
+    pointer-events: none; /* don’t block clicks */
+}
+
+.destination:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 0 3px #E8802A inset, 0 0 15px rgba(255, 214, 69, 0.9);
 }
